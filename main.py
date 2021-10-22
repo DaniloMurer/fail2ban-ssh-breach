@@ -16,12 +16,14 @@ def connect_to_ssh() :
     HOST = '192.168.56.101'
     PORT = 22
 
-    sock = socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9150, True)
+    my_socket = socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9150, True)
+    sock = my_socket.socksocket
     sock.connect((HOST, PORT))
 
     s = Session()
     s.options_set(options.HOST, HOST)
     s.options_set(options.USER, USERNAME)
+    s.options_set(options.PASSWORD_AUTH, "//Danilu01//")
     s.options_set_port(PORT)
     s.set_socket(sock)
     s.connect()
@@ -56,7 +58,7 @@ def get_current_ip():
 
 def renew_tor_ip():
     with Controller.from_port(port = 9051) as controller:
-        controller.authenticate(password="MyStr0n9P#D")
+        controller.authenticate(password="passport123")
         controller.signal(Signal.NEWNYM)
 
 
