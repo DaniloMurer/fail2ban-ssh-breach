@@ -1,44 +1,26 @@
 import requests
 import time
-from stem import Signal
-from stem.control import Controller
 import os
-import pwd
-import socket
+import paramiko
 import socks
-from ssh.session import Session
-from ssh import options
+
 
 
 def connect_to_ssh() : 
     # Linux only
-    USERNAME = "jada"
-    HOST = '192.168.56.101'
+    USERNAME = "test"
+    HOST = 'danilojakob.ch'
     PORT = 22
 
-    my_socket = socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9150, True)
-    sock = my_socket.socksocket
-    sock.connect((HOST, PORT))
 
-    s = Session()
-    s.options_set(options.HOST, HOST)
-    s.options_set(options.USER, USERNAME)
-    s.options_set(options.PASSWORD_AUTH, "//Danilu01//")
-    s.options_set_port(PORT)
-    s.set_socket(sock)
-    s.connect()
+    ssh = paramiko.SSHClient()
+    ssh.load_system_host_keys()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    # Authenticate with agent
-    s.userauth_agent(USERNAME)
+    print("Connecting")
 
-    chan = s.channel_new()
-    chan.open_session()
-    chan.request_exec('echo me')
-    size, data = chan.read()
-    while size > 0:
-        print(data.strip())
-        size, data = chan.read()
-    chan.close()
+    ssh.connect(HOST, port=PORT, username=USERNAME, password="test", banner_timeout=200)
+
 
 def get_current_ip():
     session = requests.session()
@@ -57,13 +39,15 @@ def get_current_ip():
 
 
 def renew_tor_ip():
-    with Controller.from_port(port = 9051) as controller:
-        controller.authenticate(password="passport123")
-        controller.signal(Signal.NEWNYM)
+    os.system("sudo service tor restart")
 
 
 if __name__ == "__main__":
-    for i in range(5):
+    while True:
+        #time.sleep(5)
         print(get_current_ip())
+        #if counter == 3:
+        #    counter = 0
         renew_tor_ip()
-        time.sleep(5)
+        connect_to_ssh()
+        #counter += 1
